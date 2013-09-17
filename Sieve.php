@@ -7,7 +7,7 @@ class Sieve
 {
     private $debug = false;
     private $range = array();
-    private $primes = array();
+    private $primes = array(2);
     private $n = 0;
     private $ops = 0;
     private $time = 0.0;
@@ -18,8 +18,6 @@ class Sieve
     {
         $this->start_timing();
         $this->n = $n;
-        $this->primes = array(2);
-        $this->range = array();
         $this->create_range($n);
         foreach ($this->range as $possible_prime => $is_prime) {
             //            $this->debug_message("Checking " . $possible_prime);
@@ -64,7 +62,7 @@ class Sieve
                 return;
             }
             //            $this->debug_message("Marking " . $prime * $number . " not prime");
-//            $this->ops++;
+            //            $this->ops++;
             $this->range[$prime * $number] = 0;
         }
     }
