@@ -20,13 +20,13 @@ class Sieve
         $this->n = $n;
         $this->create_range($n);
         foreach ($this->range as $possible_prime => $is_prime) {
-            //            $this->debug_message("Checking " . $possible_prime);
+            // $this->debug_message("Checking " . $possible_prime);
             if ($this->range[$possible_prime] == 0) {
-                //                $this->debug_message("Skipping " . $possible_prime);
+                // $this->debug_message("Skipping " . $possible_prime);
                 continue;
             }
             if ($this->is_prime($possible_prime)) {
-                //                $this->debug_message("Prime " . $possible_prime);
+                // $this->debug_message("Prime " . $possible_prime);
                 $this->mark_composites($possible_prime);
             }
         }
