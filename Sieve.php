@@ -61,8 +61,8 @@ class Sieve
             if ($prime * $number > $this->n) {
                 return;
             }
-            //            $this->debug_message("Marking " . $prime * $number . " not prime");
-            //            $this->ops++;
+            // $this->debug_message("Marking " . $prime * $number . " not prime");
+            // $this->ops++;
             $this->range[$prime * $number] = 0;
         }
     }
@@ -76,16 +76,16 @@ class Sieve
         $is = true;
         $sq = (int)floor(sqrt($m));
         for ($i = $sq; $i > 2; $i--) {
-            //            $this->debug_message("Start from $sq, checking $i");
+            // $this->debug_message("Start from $sq, checking $i");
             if ($this->range[$i] == 0 || $m == $i) {
-                //                $this->debug_message("Skipping $m % $i");
+                // $this->debug_message("Skipping $m % $i");
                 continue;
             }
-            //            $this->debug_message("Trying $m % $i");
+            // $this->debug_message("Trying $m % $i");
             $this->ops++;
 
             if ($m % $i == 0) {
-                //                $this->debug_message("$m is not prime");
+                // $this->debug_message("$m is not prime");
                 $is = false;
             }
         }
