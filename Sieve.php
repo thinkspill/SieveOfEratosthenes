@@ -5,11 +5,12 @@
  */
 class Sieve
 {
-    private $debug = false;
+    private $debug = true;
     private $range = array();
     private $primes = array(2);
     private $n = 0;
-    private $ops = 0;
+    private $div_ops = 0;
+    private $mark_ops = 0;
     private $time = 0.0;
     private $start = 0.0;
     private $end = 0.0;
@@ -19,23 +20,7 @@ class Sieve
 
     public function __construct($n)
     {
-        $this->start_timing();
         $this->n = $n;
-        $this->start_timing(true);
-        $this->create_range($n);
-        $this->end_timing(true);
-        foreach ($this->range as $possible_prime => $is_prime) {
-            // $this->debug_message("Checking " . $possible_prime);
-            if ($this->range[$possible_prime] == 0) {
-                // $this->debug_message("Skipping " . $possible_prime);
-                continue;
-            }
-            if ($this->is_prime($possible_prime)) {
-                // $this->debug_message("Prime " . $possible_prime);
-                $this->mark_composites($possible_prime);
-            }
-        }
-        $this->end_timing();
     }
 
     /**
@@ -56,13 +41,32 @@ class Sieve
     private function mark_composites($prime)
     {
         foreach ($this->range as $number => $is_prime) {
-            if ($prime * $number > $this->n) {
+            $composite = $prime * $number;
+            if ($composite > $this->n) {
+                $this->debug_message(
+                    $composite . " is beyond " . $this->n . ", aborting"
+                );
                 return;
             }
-            // $this->debug_message("Marking " . $prime * $number . " not prime");
-            // $this->ops++;
-            $this->range[$prime * $number] = 0;
+            if ($this->range[$composite] == 0) {
+                $this->debug_message(
+                    $composite . " is already marked, skipping"
+                );
+                continue;
+            }
+            $this->debug_message(
+                "Marking " . $prime * $number . " composite of " . $prime
+            );
+            $this->ops++;
+            $this->range[$composite] = 0;
         }
+
+        //        $range = count($this->range)-1;
+        //        for ($i = 0; $i < $range; $i++)
+        //        {
+        //            if ($this->[$])
+        //        }
+
     }
 
     /**
@@ -74,16 +78,17 @@ class Sieve
         $is = true;
         $sq = (int)floor(sqrt($m));
         for ($i = $sq; $i > 2; $i--) {
-            // $this->debug_message("Start from $sq, checking $i");
+            $this->debug_message("Start from $sq, checking $i");
             if ($this->range[$i] == 0 || $m == $i) {
-                // $this->debug_message("Skipping $m % $i");
+                //            if ($m == $i) {
+                $this->debug_message("Skipping $m % $i");
                 continue;
             }
-            // $this->debug_message("Trying $m % $i");
+            $this->debug_message("Trying $m % $i");
             $this->ops++;
 
             if ($m % $i == 0) {
-                // $this->debug_message("$m is not prime");
+                $this->debug_message("$m is not prime");
                 $is = false;
             }
         }
@@ -114,6 +119,7 @@ class Sieve
         $field_end = 'end';
         $field_time = 'time';
         if ($fill) {
+            $field_start = 'fill_start';
             $field_end = 'fill_end';
             $field_time = 'fill_time';
         }
@@ -135,6 +141,7 @@ class Sieve
 
     public function report()
     {
+        $this->run($this->n);
         $count_primes = count($this->primes);
         $pps = round(count($this->primes) / $this->time);
         //        print_r($this->range);
@@ -148,22 +155,46 @@ class Sieve
         echo "\nFill time: " . $this->fill_time;
         echo "\nMemory: " . number_format(memory_get_peak_usage());
         echo "\n";
+        print_r($this->primes);
 
+    }
+
+    /**
+     * @param $n
+     */
+    private function run($n)
+    {
+        $this->start_timing();
+        $this->start_timing(true);
+        $this->create_range($n);
+        $this->end_timing(true);
+        foreach ($this->range as $possible_prime => $is_prime) {
+            $this->debug_message("Checking " . $possible_prime);
+            if ($this->range[$possible_prime] == 0) {
+                $this->debug_message("Skipping " . $possible_prime);
+                continue;
+            }
+            if ($this->is_prime($possible_prime)) {
+                $this->debug_message("Prime " . $possible_prime);
+                $this->mark_composites($possible_prime);
+            }
+        }
+        $this->end_timing();
     }
 }
 
-$s = new Sieve(10);
+$s = new Sieve(20);
 $s->report();
 
-$s = new Sieve(100);
-$s->report();
-
-$s = new Sieve(1000);
-$s->report();
-
-$s = new Sieve(10000);
-$s->report();
-
-$s = new Sieve(20000);
-$s->report();
+//$s = new Sieve(100);
+//$s->report();
+//
+//$s = new Sieve(1000);
+//$s->report();
+//
+//$s = new Sieve(10000);
+//$s->report();
+//
+//$s = new Sieve(20000);
+//$s->report();
 
