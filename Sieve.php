@@ -7,11 +7,13 @@ class Sieve
 {
     private $debug = false;
     private $range = array();
-    private $primes = array(2);
+    private $primes = array(2 => 2);
     private $n = 0;
     private $div_ops = 0;
     private $mark_ops = 0;
     private $mult_ops = 0;
+    private $range_read = 0;
+    private $range_write = 0;
     private $time = 0.0;
     private $start = 0.0;
     private $end = 0.0;
@@ -24,86 +26,42 @@ class Sieve
         $this->n = $n;
     }
 
-    /**
-     * creates an array of n size
-     * @param $n
-     */
-    private function create_range($n)
+    public function report()
     {
-        $this->range = array_fill(2, $n - 1, 1);
-    }
+        $this->run($this->n);
+        $count_primes = count($this->primes);
+        echo "\n";
+        echo "\nSearching " . $this->n . " numbers";
+        echo "\nFound " . $count_primes . " primes in " . $this->time . " s";
+        echo "\nDivisions: " . $this->div_ops . " = " . round(
+                $this->div_ops / $this->n,
+                1
+            ) . "*n";
+        echo "\nMultiplications: " . $this->mult_ops . " = " . round(
+                $this->mult_ops / $this->n
+            ) . "*n";
+        echo "\nRange Reads: " . $this->range_read . " = " . round(
+                $this->range_read / $this->n
+            ) . "*n";
+        echo "\nRange Writes: " . $this->range_write . " = " . round(
+                $this->range_write / $this->n
+            ) . "*n";
 
+        $total_ops = $this->range_write + $this->range_read + $this->div_ops +
+            $this->mult_ops + $this->mark_ops;
 
-    /**
-     * marks all composite numbers of a given prime
-     *
-     * @param $prime int number for which to mark composites
-     */
-    private function mark_composites($prime)
-    {
-        foreach ($this->range as $number => $is_prime) {
-            $this->mult_ops++;
-            $composite = $prime * $number;
-            if ($composite > $this->n) {
-                $this->debug_message(
-                    $composite . " is beyond " . $this->n . ", aborting"
-                );
-                return;
-            }
-            if ($this->range[$composite] == 0) {
-                $this->debug_message(
-                    $composite . " is already marked, skipping"
-                );
-                continue;
-            }
-            $this->debug_message(
-                "Marking " . $composite . " composite of " . $prime
-            );
-            $this->mark_ops++;
-            $this->range[$composite] = 0;
-        }
-
-        //        $range = count($this->range)-1;
-        //        for ($i = 0; $i < $range; $i++)
-        //        {
-        //            if ($this->[$])
-        //        }
+        echo "\nTotal ops: " . $total_ops . " ( total ops " . ceil(
+                $total_ops / $this->n
+            ) . "*n )";
+        echo "\nFill time: " . $this->fill_time;
+        echo "\nMemory: " . number_format(
+                memory_get_peak_usage()
+            ) . " ( " . ceil(memory_get_peak_usage() / $this->n) . " bytes * n )";
+        echo "\n";
+        //        print_r($this->primes);
 
     }
 
-    /**
-     * @param $m int check if this number is a prime or not
-     * @return bool
-     */
-    private function is_prime($m)
-    {
-        $is = true;
-        $sq = (int)floor(sqrt($m));
-        $this->debug_message("SQ is " . $sq);
-        for ($i = $sq; $i > 3; $i--) {
-
-            if ($this->range[$i] == 0)
-            {
-                continue;
-            }
-
-            $this->debug_message("Trying $m % $i");
-
-            $this->div_ops++;
-
-            if ($m % $i == 0) {
-                $this->debug_message("$m is not prime");
-                $is = false;
-            }
-        }
-
-        if ($is) {
-            if ($m != 2) {
-                $this->primes[] = $m;
-            }
-        }
-        return $is;
-    }
 
     private function start_timing($fill = false)
     {
@@ -130,6 +88,15 @@ class Sieve
     }
 
     /**
+     * creates an array of n size
+     * @param $n
+     */
+    private function create_range($n)
+    {
+        $this->range = array_fill(2, $n - 1, 1);
+    }
+
+    /**
      * @param $message string to be output
      */
     private function debug_message($message)
@@ -140,27 +107,66 @@ class Sieve
         echo $message . "\n";
     }
 
-    public function report()
+    /**
+     * @param $m int check if this number is a prime or not
+     * @return bool
+     */
+    private function is_prime($m)
     {
-        $this->run($this->n);
-        $count_primes = count($this->primes);
-        $pps = round(count($this->primes) / $this->time);
-        //        print_r($this->range);
-        //        print_r($this->primes);
-        echo "\n";
-        echo "Searching " . $this->n . " numbers.\n";
-        echo "Found " . $count_primes . " primes in " . $this->time . " s\n";
-//        echo $pps . " primes per second in " . $this->ops . " operations (" . round(
-//                $this->ops / $this->n
-//            ) . "*n + n ops)";
-        echo "\nDivisions: " . $this->div_ops . " = " . round($this->div_ops / $this->n) . "*n";
-        echo "\nMultiplications: " . $this->mult_ops . " = " . round($this->mult_ops / $this->n) . "*n";
-        echo "\nMarks: " . $this->mark_ops  . " = " . round($this->mark_ops / $this->n) . "*n";
-        echo "\nFill time: " . $this->fill_time;
-        echo "\nMemory: " . number_format(memory_get_peak_usage());
-        echo "\n";
-        //        print_r($this->primes);
+        $is = true;
+        $sq = (int)floor(sqrt($m));
+        $this->debug_message("SQ is " . $sq);
+        foreach ($this->primes as $prime) {
+            if ($prime > $sq) {
+                break;
+            }
+            $this->debug_message("Trying $m % $prime");
 
+            $this->div_ops++;
+
+            if ($m % $prime == 0) {
+                $this->debug_message("$m is not prime");
+                $is = false;
+                break;
+            }
+        }
+
+        if ($is) {
+            $this->primes[$m] = $m;
+        }
+        return $is;
+    }
+
+    /**
+     * marks all composite numbers of a given prime
+     *
+     * @param $prime int number for which to mark composites
+     */
+    private function mark_composites($prime)
+    {
+        foreach ($this->range as $number => $is_prime) {
+            $this->range_read++;
+            $this->mult_ops++;
+            $composite = $prime * $number;
+            if ($composite > $this->n) {
+                $this->debug_message(
+                    $composite . " is beyond " . $this->n . ", aborting"
+                );
+                return;
+            }
+            $this->range_read++;
+            if ($this->range[$composite] == 0) {
+                $this->debug_message(
+                    $composite . " is already marked, skipping"
+                );
+                continue;
+            }
+            $this->debug_message(
+                "Marking " . $composite . " composite of " . $prime
+            );
+            $this->range_write++;
+            $this->range[$composite] = 0;
+        }
     }
 
     /**
@@ -173,9 +179,9 @@ class Sieve
         $this->create_range($n);
         $this->end_timing(true);
         foreach ($this->range as $possible_prime => $is_prime) {
-            //            $this->debug_message("Checking " . $possible_prime);
-            if ($this->range[$possible_prime] == 0) {
-                //                $this->debug_message("Already Composite " . $possible_prime);
+            $this->debug_message("Checking " . $possible_prime . " - $is_prime");
+            if (!$is_prime) {
+                $this->debug_message("Already Composite " . $possible_prime);
                 continue;
             }
             if ($this->is_prime($possible_prime)) {
@@ -187,9 +193,9 @@ class Sieve
     }
 }
 
-//$s = new Sieve(200);
-//$s->report();
-
+$s = new Sieve(20);
+$s->report();
+//
 //$s = new Sieve(100);
 //$s->report();
 //
@@ -199,6 +205,6 @@ class Sieve
 //$s = new Sieve(10000);
 //$s->report();
 //
-$s = new Sieve(150000);
-$s->report();
+//$s = new Sieve(300000);
+//$s->report();
 
