@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Class Sieve of Eratosthenes
+ * Class Sieve of Eratosthenes.
  */
 class Sieve
 {
     private $debug = false;
-    private $range = array();
-    private $primes = array(2 => 2);
+    private $range = [];
+    private $primes = [2 => 2];
     private $n = 0;
     private $div_ops = 0;
     private $mark_ops = 0;
@@ -31,37 +31,35 @@ class Sieve
         $this->run($this->n);
         $count_primes = count($this->primes);
         echo "\n";
-        echo "\nSearching " . $this->n . " numbers";
-        echo "\nFound " . $count_primes . " primes in " . $this->time . " s";
-        echo "\nDivisions: " . $this->div_ops . " = " . round(
+        echo "\nSearching ".$this->n.' numbers';
+        echo "\nFound ".$count_primes.' primes in '.$this->time.' s';
+        echo "\nDivisions: ".$this->div_ops.' = '.round(
                 $this->div_ops / $this->n,
                 1
-            ) . "*n";
-        echo "\nMultiplications: " . $this->mult_ops . " = " . round(
+            ).'*n';
+        echo "\nMultiplications: ".$this->mult_ops.' = '.round(
                 $this->mult_ops / $this->n
-            ) . "*n";
-        echo "\nRange Reads: " . $this->range_read . " = " . round(
+            ).'*n';
+        echo "\nRange Reads: ".$this->range_read.' = '.round(
                 $this->range_read / $this->n
-            ) . "*n";
-        echo "\nRange Writes: " . $this->range_write . " = " . round(
+            ).'*n';
+        echo "\nRange Writes: ".$this->range_write.' = '.round(
                 $this->range_write / $this->n
-            ) . "*n";
+            ).'*n';
 
         $total_ops = $this->range_write + $this->range_read + $this->div_ops +
             $this->mult_ops + $this->mark_ops;
 
-        echo "\nTotal ops: " . $total_ops . " ( total ops " . ceil(
+        echo "\nTotal ops: ".$total_ops.' ( total ops '.ceil(
                 $total_ops / $this->n
-            ) . "*n )";
-        echo "\nFill time: " . $this->fill_time;
-        echo "\nMemory: " . number_format(
+            ).'*n )';
+        echo "\nFill time: ".$this->fill_time;
+        echo "\nMemory: ".number_format(
                 memory_get_peak_usage()
-            ) . " ( " . ceil(memory_get_peak_usage() / $this->n) . " bytes * n )";
+            ).' ( '.ceil(memory_get_peak_usage() / $this->n).' bytes * n )';
         echo "\n";
         //        print_r($this->primes);
-
     }
-
 
     private function start_timing($fill = false)
     {
@@ -88,7 +86,8 @@ class Sieve
     }
 
     /**
-     * creates an array of n size
+     * creates an array of n size.
+     *
      * @param $n
      */
     private function create_range($n)
@@ -104,18 +103,19 @@ class Sieve
         if (!$this->debug) {
             return;
         }
-        echo $message . "\n";
+        echo $message."\n";
     }
 
     /**
      * @param $m int check if this number is a prime or not
+     *
      * @return bool
      */
     private function is_prime($m)
     {
         $is = true;
-        $sq = (int)floor(sqrt($m));
-        $this->debug_message("SQ is " . $sq);
+        $sq = (int) floor(sqrt($m));
+        $this->debug_message('SQ is '.$sq);
         foreach ($this->primes as $prime) {
             if ($prime > $sq) {
                 break;
@@ -134,11 +134,12 @@ class Sieve
         if ($is) {
             $this->primes[$m] = $m;
         }
+
         return $is;
     }
 
     /**
-     * marks all composite numbers of a given prime
+     * marks all composite numbers of a given prime.
      *
      * @param $prime int number for which to mark composites
      */
@@ -150,19 +151,20 @@ class Sieve
             $composite = $prime * $number;
             if ($composite > $this->n) {
                 $this->debug_message(
-                    $composite . " is beyond " . $this->n . ", aborting"
+                    $composite.' is beyond '.$this->n.', aborting'
                 );
+
                 return;
             }
             $this->range_read++;
             if ($this->range[$composite] == 0) {
                 $this->debug_message(
-                    $composite . " is already marked, skipping"
+                    $composite.' is already marked, skipping'
                 );
                 continue;
             }
             $this->debug_message(
-                "Marking " . $composite . " composite of " . $prime
+                'Marking '.$composite.' composite of '.$prime
             );
             $this->range_write++;
             $this->range[$composite] = 0;
@@ -179,13 +181,13 @@ class Sieve
         $this->create_range($n);
         $this->end_timing(true);
         foreach ($this->range as $possible_prime => $is_prime) {
-            $this->debug_message("Checking " . $possible_prime . " - $is_prime");
+            $this->debug_message('Checking '.$possible_prime." - $is_prime");
             if (!$is_prime) {
-                $this->debug_message("Already Composite " . $possible_prime);
+                $this->debug_message('Already Composite '.$possible_prime);
                 continue;
             }
             if ($this->is_prime($possible_prime)) {
-                $this->debug_message("Prime " . $possible_prime);
+                $this->debug_message('Prime '.$possible_prime);
                 $this->mark_composites($possible_prime);
             }
         }
@@ -207,4 +209,3 @@ $s->report();
 //
 //$s = new Sieve(300000);
 //$s->report();
-
